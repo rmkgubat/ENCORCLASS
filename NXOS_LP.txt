@@ -1,0 +1,322 @@
+EVE-NG CISCO NEXUS-OS LESSON PLAN (in-case ipa-discuss rin ito ni bossing sa akin...)
+
+----------------------------------------
+
+
+CISCO NEXUS Switch is mostly used by the very rich Enterprise Companies.
+-The reason daw kaya maraming binebentang Cisco Switch from 6-digits to 5-digits (even 4-digits lang) sa FB Marketplace
+because may mga nagpapalit na ng NEXUS Switches. Para makapag-implement rin ng bagong SPINE-LEAF Design.
+
+
+Hands On: 
+Locate the Eve-NG VM, preferably yung disk space ay very maluwag.
+
+Wala nang imo-modify sa VM, as in 32GB RAM (unless ubra pang taasan), 8 Core Procie, and NAT.
+
+While booting, konting kwento: 
+Visit this link for their shocking prices: https://www.router-switch.com/cisco-switches-nexus-9000-price.html
+
+The IP Address will be shown after boot. (Typically 192.168.108.xxx)
+Sa first login: admin/eve
+
+Login After "CONF_CONTROL: System ready": admin/C1sc0123
+
+
+ANO IBA DITO...
+
+!bawal mag CTRL-C para makabalik sa bungad ng priv.mode 
+!hindi lahat ng Copy-Paste ay properly taking effect. (kadalasan crashing sya, so X-Fingers nalang, or better yet type-it mode nalang)
+!no need sa "do" kapag nasa loob ng global-config mode and further
+!mag-show run, then you will see a lot of ETHs.
+
+
+
+LET'S GET TO SOME TEST!!!
+
+@NXa
+
+!try these common commands from traditional IOS:
+
+conf t
+router bgp 1
+router ospf 1
+
+!of course all of the are invalid. Kasi ganito... naka-tago pa yung "feature" nila.
+
+NSOXa# show feature
+Feature Name          Instance  State   
+--------------------  --------  --------
+Flexlink               1          disabled
+analytics              1          disabled
+bash-shell             1          disabled
+bfd                    1          disabled
+bgp                    1          disabled
+:
+:
+:
+eigrp                  16         disabled
+enm                    1          disabled
+epbr                   1          disabled
+eth-port-sec           1          disabled
+:
+:
+:
+interface-vlan         1          disabled
+intersight             1          disabled
+isis                   1          disabled
+:
+#and many more!!!
+
+By default, lahat ng features ay tulog, ikaw na lang gigising
+to passively conserve its utilization.
+
+
+
+ANO PA ANG IBA PA...
+
+Kaya nitong mag fallback/undo/revert/rollback (and the like)
+
+
+!Test the rollback:
+
+NXOSa(config)# checkpoint VirginPa
+Done
+
+!sige nga kung pwede ma re-virginize???
+
+conf t
+ hostname nexusjp
+ int lo 1
+ ip add 1.1.1.1 255.255.255.255
+end
+sh ip int br
+
+==========================
+NXOSa# conf t
+Enter configuration commands, one per line. End with CNTL/Z.
+NXOSa(config)#  hostname nexusjp
+ int lo 1
+nexusjp(config)#  int lo 1
+ ip add 1.1.1.1 255.255.255.255
+nexusjp(config-if)#  ip add 1.1.1.1 255.255.255.255
+nexusjp(config-if)# end
+nexusjp# sh ip int br
+
+IP Interface Status for VRF "default"(1)
+Interface            IP Address      Interface Status
+Lo1                  1.1.1.1         protocol-up/link-up/admin-up       
+
+nexusjp# conf t
+nexusjp(config)# checkpoint ConfigJapan
+==========================
+
+
+
+
+!Dagdagan pa natin... :)
+
+conf t
+ hostname nexusph
+ int lo 2
+ ip add 2.2.2.2 255.255.255.255
+checkpoint ConfigJP
+end
+sh ip int br
+
+nexusph# conf t
+nexusph(config)# checkpoint ConfigPH
+
+
+conf t
+ feature bgp
+ hostname nexusUSA
+ int lo 3
+ ip add 3.3.3.3 255.255.255.255
+end
+sh ip int br
+
+nexusUSA# conf t
+nexusUSA(config)# checkpoint ConfigUSA description With_BGP_na_ito
+
+
+!Show the checkpoints created...
+show checkpoint summary
+
+!balik PH Config
+conf t
+rollback running-config checkpoint ConfigPH
+
+!I-re-Virginize
+conf t
+rollback running-config checkpoint VirginPa
+
+!Balik Japan ulit :)
+conf t
+rollback running-config checkpoint VirginPa
+
+
+
+
+!WE have actually different V's in Cisco Switching...
+-We do the traditional "VLANS" (na pang-poor daw)
+-The other one is VXLAN (eXtensible! pang companies na may international branch na ginagamitan ng vlan in different overseas branch)
+
+!Present the illustraion of Nexus Topo and discuss some things about VLAN and VXLAN.
+
+!The reason why VXLAN is implementing.
+https://blog.cloudtrooper.net/2022/01/18/is-the-core-distribution-access-design-dead/
+
+
+!The new... Cisco ACI Spine Leaf (Application Centric Infrastructure)
+https://www.thenetworkdna.com/2018/01/cisco-aci-spine-leaf-architecture.html
+
+!Nag-exist dahil sa mga cloud-based apps na, and most sa traditional core-access-distri ay hindi kaya magkaroon ng containers (essentially apps)
+
+!In today's modern infra, may mga naka-host na App Container sa mismong Cloud Servers like Docker, Kubernetes, etc.
+It also mostly implemented by the services providers such as Netflix, Disney+, etc.
+
+
+!CONTINUATION, at huwag mag copy-paste, type mano-mano at baka ma-ul0l ...
+
+
+!Basic VXLAN Initialization:
+
+@NXOSa (JP) !don't copy-paste
+conf t
+hostname NexusJP
+int lo1
+ip add 1.1.1.1/32 
+	!yes cidr style pwede pang modern si nexus
+feature bgp
+feature ospf
+feature interface-vlan
+feature nv overlay
+feature vn-segment-vlan-based
+system jumbomtu 9216
+checkpoint basicVXLAN
+
+
+
+
+@NXOSb (PH) !don't copy-paste
+conf t
+!hostname NexusPH
+int lo2
+ip add 2.2.2.2/32
+feature bgp
+feature ospf
+feature interface-vlan
+feature nv overlay
+feature vn-segment-vlan-based
+system jumbomtu 9216
+checkpoint basicVXLAN
+
+
+
+!Full VXLAN Config
+
+@NXOSa (JP) !X-fingers mag-copy paste
+
+config t
+router ospf 10
+int e1/1
+ no switchport
+ ip address 100.1.1.1/30
+ ip router ospf 10 area 0
+ no shutdown
+ exit
+Int loopback 0
+ ip address 10.10.10.10/32
+ ip router ospf 10 area 0
+exit
+vlan 50
+ vn-segment 5000
+exit
+interface eth 1/5-6
+ switchport
+ switchport access vlan 50
+ exit
+Interface Nve 1
+ no shutdown
+ source-interface loopback 0
+ member vni 5000
+  ingress-replication protocol static
+    peer-ip 20.20.20.20
+  end
+
+
+
+@NXOSb (PH) !X-fingers mag-copy paste
+
+conf t
+router ospf 10
+!
+interface eth 1/1
+ no switchport
+ ip address 100.1.1.2/30
+ ip router ospf 10 area 0
+ no shut
+interface loopback0
+ ip address 20.20.20.20/32
+ ip router ospf 10 area 0
+!
+vlan 50
+ vn-segment 5000
+
+interface ethernet 1/5-6
+  switchport
+  switchport access vlan 50
+  no shutdown
+
+interface nve 1
+  no shutdown
+  source-interface loopback 0
+  member vni 5000
+   ingress-replication protocol static
+     peer-ip 10.10.10.10
+	 end
+
+
+!Test with the following:
+show nve vni
+!ping the magkabilang peers 10 & 20
+
+
+
+paandarin ang magkabilang R (r1 and r3 muna kasi baka ma-ul0l)
+!balik IOS ulit, press enter-enter lang if feeling complete boot na sya
+
+@R1 (JP)
+conf t
+hostname R1-JP
+int e0/0
+no shut
+ip add 50.0.0.1 255.0.0.0
+end
+
+
+@R3 (PH)
+conf t
+hostname R3-PH
+int e0/0
+no shut
+ip add 50.0.0.3 255.0.0.0
+end
+
+!i-ping magkabila...
+ping 50.0.0.1/3
+
+
+!If it pings... #GGWP :)
+
+
+
+!!pwede mo dagdagan extra si R2 and R4 kung palag-palag pa yung PC mo.
+
+
+conf t
+hostname R2/R4
+int e0/0
+no shut
+ip add 50.0.0.2/4 255.0.0.0
+end
