@@ -224,31 +224,28 @@ show ip sla statistics
 
 TASK3: NET FLOWS:
 
-nterface GigabitEthernet1
+config t
+interface GigabitEthernet3
  description NetFlow monitored interface
- ip address 192.168.10.1 255.255.255.0
- no shutdown
- ip flow monitor NETFLOW-MONITOR input
- ip flow monitor NETFLOW-MONITOR output
+ ip flow monitor s3NETFLOW-MONITOR input
+ ip flow monitor s3NETFLOW-MONITOR output
 
-flow record NETFLOW-RECORD
+flow record s1NETFLOW-RECORD
  match ipv4 source address
  match ipv4 destination address
  match transport source-port
  match transport destination-port
  collect counter bytes
  collect counter packets
- collect timestamp sys-uptime first
- collect timestamp sys-uptime last
 
-flow exporter NETFLOW-EXPORTER
- destination 192.168.10.2
+flow exporter s2NETFLOW-EXPORTER
+ destination 192.168.103.1
  transport udp 2055
  export-protocol netflow-v9
 
-flow monitor NETFLOW-MONITOR
- record NETFLOW-RECORD
- exporter NETFLOW-EXPORTER
+flow monitor s3NETFLOW-MONITOR
+ record s1NETFLOW-RECORD
+ exporter s2NETFLOW-EXPORTER
 
 QOS: for https,ssh and telnet:
 config t
