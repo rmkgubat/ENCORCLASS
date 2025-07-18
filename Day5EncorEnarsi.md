@@ -249,3 +249,69 @@ flow exporter NETFLOW-EXPORTER
 flow monitor NETFLOW-MONITOR
  record NETFLOW-RECORD
  exporter NETFLOW-EXPORTER
+
+
+sudo su
+ifconfig eth0 192.168.103.100 netmask 255.255.255.0 up
+route add default gw 192.168.103.11
+ping 192.168.103.11
+
+STEP1: define INSIDE AND OUTSIDE:
+STEP2: create Access-list to permit IP of Inside:
+STEP3: create a NAT pool with overload
+@vpnPH:
+config t
+int gi 1
+ip nat OUTSIDE
+int gi 2
+ip nat INSIDE
+int gi 3
+ip nat INSIDE
+no access-list 8
+access-list 8 permit 192.168.102.0 0.0.0.255
+access-list 8 permit 192.168.103.0 0.0.0.255
+ip nat inside source list 8 interface Gi 1 overload
+ip nat inside source static 192.168.103.21 208.8.8.51
+ip nat inside source static 192.168.103.22 208.8.8.52
+end
+FW-VPN-PH#show ip nat translations 
+Pro  Inside global         Inside local          Outside local         Outside global
+---  192.168.108.88        192.168.103.12        ---                   ---
+---  192.168.108.69        192.168.103.11        ---                   ---
+icmp 192.168.108.69:57608  192.168.103.11:57608  1.1.1.1:57608         1.1.1.1:57608
+icmp 192.168.108.69:57864  192.168.103.11:57864  8.8.8.8:57864         8.8.8.8:57864
+icmp 192.168.108.88:56840  192.168.103.12:56840  1.1.1.1:56840         1.1.1.1:56840
+icmp 192.168.108.88:57096  192.168.103.12:57096  8.8.8.8:57096         8.8.8.8:57096
+icmp 192.168.108.88:56584  192.168.103.12:56584  8.8.4.4:56584         8.8.4.4:56584
+Total number of translations: 7
+
+CREATING A WEB PROXY OR HIDING BEHIND NAT:
+www.sti.edu.ph:      vs     www.dlsu.edu.ph:
+@EDGE:
+config t
+no access-list 8
+access-list 8 permit any
+Int Gi 3
+ ip nat Inside
+Int gi 1
+ ip nat Outside
+IP Nat inside source static tcp 192.168.103.21 80 208.8.8.101 8080
+IP Nat inside source static tcp 192.168.103.21 443 208.8.8.101 8443
+IP Nat inside source static tcp 192.168.103.21 22 208.8.8.101 8069
+IP Nat inside source static tcp 192.168.103.22 80 208.8.8.102 8080
+IP Nat inside source static tcp 192.168.103.22 443 208.8.8.102 8443
+IP nat inside source list 8 int gi 1 Overload
+end
+show ip nat translation
+
+victim: nmap -v 200.0.0.100+k
+
+ExamLab Training: Make a PortAddressTranslation:
+10.m.1.9 22 --> 200.0.0.100+m 3022 =
+10.m.1.10 80 --> 200.0.0.100+m 8088 = 
+10.m.1.11 53 --> 200.0.0.100+m 4053 =
+config t
+IP Nat inside source static tcp 10.12.1.9 22 200.0.0.112 3022
+IP Nat inside source static tcp 10.12.1.10 80 200.0.0.112 8088
+IP Nat inside source static tcp 10.12.1.11 53 200.0.0.112 4053
+do sh ip nat translation
