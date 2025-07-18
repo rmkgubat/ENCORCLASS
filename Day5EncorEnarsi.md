@@ -250,7 +250,33 @@ flow monitor NETFLOW-MONITOR
  record NETFLOW-RECORD
  exporter NETFLOW-EXPORTER
 
+QOS: for https,ssh and telnet:
+config t
+! Define class-maps to match traffic types
+class-map match-any PRIORITY-HTTPS-SSH
+ match protocol https
+ match protocol ssh
 
+class-map match-any LOW-PRIORITY-TELNET
+ match protocol telnet
+
+! Define policy-map to assign priorities and bandwidth guarantees
+policy-map QoS-PRIORITY
+ class PRIORITY-HTTPS-SSH
+  priority percent 30       ! Strict priority queue with guaranteed 30% bandwidth
+ class LOW-PRIORITY-TELNET
+  bandwidth percent 5       ! Reserve 5% bandwidth for Telnet (low priority)
+ class class-default
+  fair-queue                ! Default treatment for other traffic
+
+! Apply the policy to the WAN interface (example: GigabitEthernet0/0)
+interface GigabitEthernet0/0
+ service-policy output QoS-PRIORITY
+
+
+
+
+NAT/PAT:
 sudo su
 ifconfig eth0 192.168.103.100 netmask 255.255.255.0 up
 route add default gw 192.168.103.11
