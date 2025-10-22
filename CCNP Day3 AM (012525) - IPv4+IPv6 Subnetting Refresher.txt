@@ -1,0 +1,310 @@
+RIVAN CCNP DAY 3 (AM Part):
+
+IPv4 & IPv6 Routing = Dual Stack routing.
+
+The 5 Hit Combo in IPv4 Addressing Subnets:
+
+Design 10.100.10.0 network to 5 Offices:
+
+(Combo 1-3)
+
+1. C: Convert 5 Offices to bits = 3 bits
+2. A: Add /24 + /3 = /27 (4th, 32i)
+3. I: Ipasok si 32 sa kada 4th Octet
+
+1st Office: 10.100.10.32
+2nd Office: 10.100.10.64
+3rd Office: 10.100.10.96
+4th Office: 10.100.10.128
+5th Office: 10.100.10.160
+
+If itotodo si /27, extra combo 4-5.
+
+4. Find the total hosts: /32 - ____ = /27
+-(where the missing: 2^5 = 32 - 2 = "30 hosts per subnet")
+
+5.Find all the subnets: /24 + ____ = /27
+(Where the missing: 2^3 = "8 subnets")
+6th Office: 10.100.10.192
+7th Office: 10.100.10.224
+8th Office (unused): IP Subnet Zero: 10.100.10.0
+
+@DEVOPS
+conf t
+line vty 0 14
+no logging console
+no ip domain-lookup
+int gi1
+ip add dhcp
+no shut
+exit
+
+
+alias exec sr event manager run siraloop
+
+event manager applet siraloop
+ event none
+ action 1.0 puts "How many Loopback interfaces do you wish to remove?"
+ action 1.1 puts nonewline "> "
+ action 1.2 gets num 
+ action 2.0 cli command "enable"
+ action 2.1 cli command "conf t"
+ action 3.0 set i "1"
+ action 3.1 while $i le $num
+ action 3.2  cli command "no interface Loopback $i"
+ action 3.4  increment i 1
+ action 3.5 end
+ action 4.0 cli command "end"
+ end
+
+sr
+
+!Implement the computed earlier  of 8 subnets
+
+conf t
+	int lo1 
+	ip add 10.100.10.33 255.255.255.224
+	
+	int lo2
+	ip add 10.100.10.65 255.255.255.224
+
+	int lo3
+	ip add 10.100.10.97 255.255.255.224
+
+	int lo4
+	ip add 10.100.10.129 255.255.255.224
+
+	int lo5
+	ip add 10.100.10.161 255.255.255.224
+
+	int lo6
+	ip add 10.100.10.193 255.255.255.224
+
+	int lo7
+	ip add 10.100.10.225 255.255.255.224
+
+	int lo8
+	ip add 10.100.10.1 255.255.255.224
+	end
+
+
+
+
+IPv6 Subnetting:
+
+Design the Accenture Network using face:cafe:fafa:fefe::/64 to 50 offices.
+
+Rivan Method CAI:
+ConvertMO: 50 offices = 6 bits
+AddMo:	/64 + /6 bits = /70
+IChambaMoPattern:
+			8 4 2 1   8 4 2 1   8 4 2 1   8 4 2 1
+1st Office		0 0 0 0   0 0 (regardless values here and further)
+			face:cafe:fafa:fefe:0000::/70
+2nd Office		0 0 0 0   0 1 
+			face:cafe:fafa:fefe:0400::/70
+3rd Office		0 0 0 0   1 0 
+			face:cafe:fafa:fefe:0800::/70
+4th Office		0 0 0 0   1 1 
+			face:cafe:fafa:fefe:0c00::/70
+5th Office		0 0 0 1   0 0 
+			face:cafe:fafa:fefe:1000::/70
+6th Office		0 0 0 1   0 1 
+			face:cafe:fafa:fefe:1400::/70
+7th Office		0 0 0 1   1 0 
+			face:cafe:fafa:fefe:1800::/70
+8th Office		0 0 0 1   1 1
+			face:cafe:fafa:fefe:1c00::/70
+9th Office		0 0 1 0   0 0
+			face:cafe:fafa:fefe:2000::/70
+10th Office		0 0 1 0   0 1
+			face:cafe:fafa:fefe:2400::/70
+:
+: (all the way to 50 offices)
+
+!IMPLEMENT:
+
+conf t
+ ipv6 unicast-routing
+  int lo1
+   ipv6 add face:cafe:fafa:fefe:0000::aaaa/70
+  int lo2
+   ipv6 add face:cafe:fafa:fefe:0400::aaaa/70
+  int lo3
+   ipv6 add face:cafe:fafa:fefe:0800::aaaa/70
+  int lo4
+   ipv6 add face:cafe:fafa:fefe:0c00::aaaa/70
+  int lo5
+   ipv6 add face:cafe:fafa:fefe:1000::aaaa/70
+  int lo6
+   ipv6 add face:cafe:fafa:fefe:1400::aaaa/70
+  int lo7
+   ipv6 add face:cafe:fafa:fefe:1800::aaaa/70
+  int lo8
+   ipv6 add face:cafe:fafa:fefe:1c00::aaaa/70
+  int lo9
+   ipv6 add face:cafe:fafa:fefe:2000::aaaa/70
+  int lo10
+   ipv6 add face:cafe:fafa:fefe:2400::aaaa/70
+end
+
+Design an IPv6 Network with abcd:babe:fade:f0f0::/64 to 22 offices
+
+Rivan Method CAI:
+abcd:babe:fade:f0f0::/64 subnet to 22 offices
+ConvertMo: 5 bits
+AddMo: /64 + /5 = /69
+IChambaMoPattern:
+	8 4 2 1   8 4 2 1   8 4 2 1   8 4 2 1
+1st:	0 0 0 0   0
+	abcd:babe:fade:f0f0:0000::/69
+2nd:	0 0 0 0   1
+	abcd:babe:fade:f0f0:0800::/69
+3rd:	0 0 0 1   0
+	abcd:babe:fade:f0f0:1000::/69
+4th:	0 0 0 1   1
+	abcd:babe:fade:f0f0:1800::/69
+5th:	0 0 1 0   0
+	abcd:babe:fade:f0f0:2000::/69
+6th:	0 0 1 0   1
+	abcd:babe:fade:f0f0:2800::/69
+7th:	0 0 1 1   0
+	abcd:babe:fade:f0f0:3000::/69
+8th:	0 0 1 1   1
+	abcd:babe:fade:f0f0:3800::/69
+9th:	0 1 0 0   0
+	abcd:babe:fade:f0f0:4000::/69
+10th:	0 1 0 0   1
+	abcd:babe:fade:f0f0:4800::/69
+11th:	0 1 0 1   0
+	abcd:babe:fade:f0f0:5000::/69
+
+!IMPLEMENT:
+
+conf t
+ ipv6 unicast-routing
+  int lo1
+   ipv6 add abcd:babe:fade:f0f0:0000::abcd/69
+  int lo2
+   ipv6 add abcd:babe:fade:f0f0:0800::abcd/69
+  int lo3
+   ipv6 add abcd:babe:fade:f0f0:1000::abcd/69
+  int lo4
+   ipv6 add abcd:babe:fade:f0f0:1800::abcd/69
+  int lo5
+   ipv6 add abcd:babe:fade:f0f0:2000::abcd/69
+  int lo6
+   ipv6 add abcd:babe:fade:f0f0:2800::abcd/69
+  int lo7
+   ipv6 add abcd:babe:fade:f0f0:3000::abcd/69
+  int lo8
+   ipv6 add abcd:babe:fade:f0f0:3800::abcd/69
+  int lo9
+   ipv6 add abcd:babe:fade:f0f0:4000::abcd/69
+  int lo10
+   ipv6 add abcd:babe:fade:f0f0:4800::abcd/69
+  int lo11
+   ipv6 add abcd:babe:fade:f0f0:5000::abcd/69
+end
+
+
+IPv6 Addressing:
+
+- 128-bit sya vs. IPv4 na 32 bits
+
+- pitong hiwa sa IPv6 (colons :) VS sa IPv4 na apat ang hiwa (dots .), 
+
+- Valid values ay 4-digits na hexadecimal values before hiwa
+ 	(0,1,2,3,4,5,6,7,8,9,a,b,c,d,e,f)
+ex. fe80:1234:5678:90aa:bbbb:cccc:dddd:eeee
+
+It allows zero omission (para mapag-igsi):
+Continuous zeroes can be eliminated, in the place of those zeroes, simply use a double colon (::) symbol. 
+
+Rule One – Leading Zero Omission
+Before: 1111 : 0123 : 0012 : 0001 : abcd : 0abc : 9891 : abcd
+After : 1111:123:12:1:abcd:abc:9891:abcd
+	(remove spaces nalang for proper addressing, spaces added for easy trace)
+
+---
+
+Rule Two: Continous Zero Omission
+Before: 1111 : 0000 : 0000 : 0000 : 1234 : abcd : abcd : abcd
+After:  1111::1234:abcd:abcd:abcd 
+(pinagsama yung 2nd, 3rd, 4th hiwa na zeros into double-colon)
+(remove spaces nalang for proper addressing, spaces added for easy trace)
+
+Another Before: 1234 : 0000 : 0000 : 0000 : abcd : 0000: 0000 : beef
+Another After:  1234::abcd:0:0:beef
+(remove spaces nalang for proper addressing, spaces added for easy trace)
+(mas maraming magkakasamang zero will be ommitted to ::)
+(1-time lang ubra mag double-colon, kaya sa remaining hiwa may single 0 na maiiwan)
+
+---
+
+Rule Three – Discontinuous Zero Omission
+Before: 1111 : 0000 : 0000 : abcd : 0101 : 0000 : 1230 : f00d
+After:  1111::abcd:101:0:1230:f00d
+	(remove spaces nalang for proper addressing, spaces added for easy trace)
+
+--- #gg
+
+
+You may address IPv6 like the previously common ways in IPv4...
+Sa style ipv4: 192.168.1.10 /24
+Sa style ipv6: 192:168:1::10 /64 (originally 0192:0168:0001:0000:0000:0000:0000:0010)
+
+
+
+Try to convert:
+
+1. 000a:000c:0000:0000:0000:0000:0000:0000/64 = a:c:: /64
+
+2. 0000:0000:0000:0000:0000:0000:0000:0000/0 = ::/0 [IPv6 defaultroute]
+
+3. fe80:0000:0000:0000:000a:0000:0000:000f/64 = fe80::a:0:0:f/64
+	
+4. 2002:6500:0000:3000:0000:0000:0000:0000/64 =  2002:6500:0:3000::/64
+	
+5. 0000:0000:0000:0000:0000:0000:0000:0001/128 = ::1/128  [IPv6 loopback]	
+	
+6. ff00:0000:0000:beef:a00a:0aa0:0000:0000/8 = FF00::BEEF:A00A:AA0:0:0 /8
+
+7. 2001:0db8:0001:0000:0000:0ab9:C0A8:0102/64 = 2001:db8:1::ab9:C0A8:102 /64
+
+8. 1200:0000:130F:0000:0000:09C0:876A:100B/64 =	1200:0:130f::9c0:876a:100b /64
+
+9. 2041:1000:140F:0000:0000:0000:875B:001B/96 =  2041:1000:140F::875B:1B /96
+
+10.2001:4860:4860:0000:0000:0000:0000:8888/128 =  2001:4860:4860::8888/128 [Google IPv6 DNS]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

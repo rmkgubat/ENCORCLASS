@@ -1,0 +1,766 @@
+##EncorDay3:
+
+@SecureCRT... Access the following "IN-ORDER"
+PNB-A : BPI-A : PE-A : PCore-A : PCore-B : PE-Z : BPI-B : PNB-B
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+MPLS supah lab:
+
+R4-PEa:
+enable
+configure terminal
+! hostname R4-PEa
+ enable secret pass
+ no ip domain-lookup
+ logging console
+ alias exec bp show ip int brief | ex una
+ alias exec sr show ip route
+ alias exec sp show ip protocols
+ ip subnet-zero
+ int lo 0
+   ip address 172.16.1.4 255.255.255.255
+end
+
+***
+
+R3-Pcore:
+enable
+configure terminal
+! hostname R3-PCoreA
+ enable secret pass
+ no ip domain-lookup
+ logging console
+ ip subnet-zero
+ int lo 0
+   ip address 172.16.1.3 255.255.255.255
+   no shut
+end
+
+***
+
+R2:
+enable
+configure terminal
+! hostname R2-PCoreB
+ enable secret pass
+ no ip domain-lookup
+ logging console
+ ip subnet-zero
+ int lo 0
+   ip address 172.16.1.2 255.255.255.255
+   no shut
+end
+
+
+****
+
+R1PEz:
+enable
+configure terminal
+! hostname R1-PEz
+ enable secret pass
+ no ip domain-lookup
+ logging console
+ ip subnet-zero
+ int lo 0
+   ip address 172.16.1.1 255.255.255.255
+   no shut
+end
+
+**********
+
+***
+
+D1-pnbA:
+enable
+configure terminal
+! hostname D1-PNBalabang
+ enable secret pass
+ no ip domain-lookup
+ logging console
+ alias exec bp show ip int brief | ex una
+ alias exec sr show ip route
+ alias exec sp show ip protocols
+ ip subnet-zero
+ int Ethernet1/1
+   ip address 10.1.1.1 255.255.255.252
+   no shut
+end
+
+***
+
+***
+
+isp1-pnbB:
+enable
+configure terminal
+! hostname PNBbgc
+ enable secret pass
+ no ip domain-lookup
+ logging console
+ alias exec bp show ip int brief | ex una
+ alias exec sr show ip route
+ alias exec sp show ip protocols
+ ip subnet-zero
+ int Eth 1/3
+   ip address 10.1.1.5 255.255.255.252
+   no shut
+end
+
+***
+
+D2-BPIa:
+enable
+configure terminal
+! hostname D2-BPIalaBng
+ enable secret pass
+ no ip domain-lookup
+ logging console
+ ip subnet-zero
+ int Ethernet1/1
+   ip address 10.1.1.1 255.255.255.252
+   no shut
+end
+
+***
+
+ISp2-BPIB:
+configure terminal
+! hostname I2BPIbgc
+ enable secret pass
+ no ip domain-lookup
+ logging console
+ alias exec bp show ip int brief | ex una
+ alias exec sr show ip route
+ alias exec sp show ip protocols
+ ip subnet-zero
+ int  Eth 1/3
+   ip address 10.1.1.5 255.255.255.252
+   no shut
+end
+
+*********************************************
+
+Step0: Enable Basic OSPF routing on Core:
+
+
+R4-Pea
+config t
+ no router ospf 1
+ router ospf 1
+  network 172.16.0.0 0.0.255.255 area 0
+  network 10.1.1.8 0.0.0.3 area 0
+end
+
+R3-PCore
+config t
+ no router ospf 1
+ router ospf 1
+  network 172.16.0.0 0.0.255.255 area 0
+  network 10.1.1.8 0.0.0.3 area 0
+  network 10.1.1.4 0.0.0.3 area 0
+end
+
+R2-PCoreb
+config t
+ no router ospf 1
+ router ospf 1
+  network 172.16.0.0 0.0.255.255 area 0
+  network 10.1.1.0 0.0.0.3 area 0
+  network 10.1.1.4 0.0.0.3 area 0
+end
+
+R1:Pez
+config t
+ no router ospf 1
+ router ospf 1
+  network 172.16.0.0 0.0.255.255 area 0
+  network 10.1.1.0 0.0.0.3 area 0
+end
+
+
+
+
+STEP1: BASIC MPLS CONFIGURATION AT TELCO core:
+        datacenter eng/core/wan/telco eng.
+          highly paid syet!
+
+R4:PEa
+config t
+ ip cef
+ mpls ip
+  int Ethernet1/2
+    mpls ip
+    mpls label protocol ldp
+	mpls mtu override 1512 
+    end
+
+***
+
+R3:P:
+config t
+ ip cef
+ mpls ip
+  int Ethernet1/1
+    mpls ip
+    mpls label protocol ldp
+    !mpls mtu override 1512 
+  int Ethernet1/2
+    mpls ip
+    mpls label protocol ldp
+	mpls mtu override 1512
+end
+
+****
+***
+R2:P:
+config t
+ ip cef
+ mpls ip
+  int Ethernet1/1
+    mpls ip
+    mpls label protocol ldp
+    !mpls mtu override 1512
+  int Ethernet1/2
+    mpls ip
+    mpls label protocol ldp
+	mpls mtu override 1512
+	end
+
+
+****
+
+
+R1-1:PEz
+config t
+ ip cef
+ mpls ip
+  int Ethernet1/0
+    mpls ip
+    mpls label protocol ldp
+	mpls mtu override 1512
+	end
+
+
+How to check:
+R2P#show mpls ldp neighbor (lib)
+        Peer LDP Ident: 172.16.1.3:0; Local LDP Ident 172.16.1.2:0
+        TCP connection: 172.16.1.3.11463 - 172.16.1.2.646
+        State: Oper; Msgs sent/rcvd: 10/10; Downstream
+        Up time: 00:00:28
+        LDP discovery sources:
+          Ethernet1/1, Src IP addr: 10.1.1.6
+        Addresses bound to peer LDP Ident:
+          10.1.1.6        10.1.1.9        172.16.1.3      
+    Peer LDP Ident: 172.16.1.1:0; Local LDP Ident 172.16.1.2:0
+        TCP connection: 172.16.1.1.646 - 172.16.1.2.28748
+        State: Oper; Msgs sent/rcvd: 10/13; Downstream
+        Up time: 00:00:21
+        LDP discovery sources:
+          Ethernet1/2, Src IP addr: 10.1.1.1
+        Addresses bound to peer LDP Ident:
+          10.1.1.1        208.8.8.1       207.7.7.1       209.9.9.1       
+          172.16.1.1      
+
+
+r2P#show mpls forwarding-table (fib)
+Local      Outgoing   Prefix           Bytes Label   Outgoing   Next Hop    
+Label      Label      or Tunnel Id     Switched      interface              
+16         Pop Label  10.1.1.8/30      0             Et1/1      10.1.1.6    
+17         Pop Label  172.16.1.1/32    0             Et1/2      10.1.1.1    
+18         Pop Label  172.16.1.3/32    0             Et1/1      10.1.1.6    
+19         19         172.16.1.4/32    0             Et1/1      10.1.1.6    
+ 
+
+r2P#show mpls ldp bindings (lfib)
+  lib entry: 10.1.1.0/30, rev 2
+        local binding:  label: imp-null
+        remote binding: lsr: 172.16.1.3:0, label: 16
+        remote binding: lsr: 172.16.1.1:0, label: imp-null
+  lib entry: 10.1.1.4/30, rev 4
+        local binding:  label: imp-null
+        remote binding: lsr: 172.16.1.3:0, label: imp-null
+        remote binding: lsr: 172.16.1.1:0, label: 16
+  lib entry: 10.1.1.8/30, rev 6
+        local binding:  label: 16
+        remote binding: lsr: 172.16.1.3:0, label: imp-null
+        remote binding: lsr: 172.16.1.1:0, label: 17
+  lib entry: 172.16.1.1/32, rev 8
+        local binding:  label: 17
+        remote binding: lsr: 172.16.1.3:0, label: 17
+        remote binding: lsr: 172.16.1.1:0, label: imp-null
+  lib entry: 172.16.1.2/32, rev 10
+        local binding:  label: imp-null
+        remote binding: lsr: 172.16.1.3:0, label: 18
+        remote binding: lsr: 172.16.1.1:0, label: 18
+  lib entry: 172.16.1.3/32, rev 12
+        local binding:  label: 18
+        remote binding: lsr: 172.16.1.3:0, label: imp-null
+        remote binding: lsr: 172.16.1.1:0, label: 19
+  lib entry: 172.16.1.4/32, rev 14
+        local binding:  label: 19
+        remote binding: lsr: 172.16.1.3:0, label: 19
+        remote binding: lsr: 172.16.1.1:0, label: 20
+
+
+
+r2P#show ip route (routing table)
+      10.0.0.0/8 is variably subnetted, 5 subnets, 2 masks
+C        10.1.1.0/30 is directly connected, Ethernet1/2
+L        10.1.1.2/32 is directly connected, Ethernet1/2
+C        10.1.1.4/30 is directly connected, Ethernet1/1
+L        10.1.1.5/32 is directly connected, Ethernet1/1
+O        10.1.1.8/30 [110/20] via 10.1.1.6, 00:01:18, Ethernet1/1
+      172.16.0.0/32 is subnetted, 4 subnets
+O        172.16.1.1 [110/11] via 10.1.1.1, 00:05:40, Ethernet1/2
+C        172.16.1.2 is directly connected, Loopback0
+O        172.16.1.3 [110/11] via 10.1.1.6, 00:05:50, Ethernet1/1
+O        172.16.1.4 [110/21] via 10.1.1.6, 00:00:58, Ethernet1/1
+
+
+
+
+
+STEP2: VRF CONFIGURATION:
+  virtual route forwarder: "Virtual/logical Router"
+  allows you to have overlapping VPN networks
+
+R4:PE_a
+config t
+ ip vrf clientBDOa
+   rd 999:1
+   route-target 64999:1
+ ip vrf clientBPIa
+   rd 999:2
+   route-target 64999:2
+ ip vrf clientPNBa
+   rd 999:3
+   route-target 64999:3 
+ip vrf clientBPOa
+   rd 888:4
+   route-target 69666:4
+ip vrf clientBSPa
+   rd 888:5
+   route-target 69666:5
+   end
+   
+***
+R1:pez
+config t
+ ip vrf clientBDOb
+  rd 999:1
+  route-target 64999:1
+ ip vrf clientBPIb
+  rd 999:2
+  route-target 64999:2
+ ip vrf clientPNBb
+  rd 999:3
+  route-target 64999:3
+ ip vrf clientBPOb
+  rd 888:4
+  route-target 69666:4
+ ip vrf clientBSPb
+  rd 888:5
+  route-target 69666:5
+  end
+  
+  
+**********
+
+R4-PEa#show ip vrf
+  Name                             Default RD            Interfaces
+  clientBDOa                       999:1                 
+  clientBPIa                       999:2                 
+  clientBPOa                       888:4                 
+  clientBSPa                       888:5                 
+  clientPNBa                       999:3             
+
+R1-PEz#show ip vrf
+  Name                             Default RD            Interfaces
+  clientBDOb                       999:1                 
+  clientBPIb                       999:2                 
+  clientBPOb                       888:4                 
+  clientBSPb                       888:5                 
+  clientPNBb                       999:3             
+
+ 
+STEP3: CONFIGURING VRF INTERFACES ON PE ROUTERS:
+
+R4:PEa
+config t
+ int Ethernet1/1
+   ip vrf forwarding clientBPIa
+   ip address 10.1.1.2 255.255.255.252
+   no shut
+ int Ethernet1/0
+   ip vrf forwarding clientPNBa
+   ip address 10.1.1.2 255.255.255.252
+   no shut
+ int Ethernet0/1
+   ip vrf forwarding clientBSPa
+   ip address 10.1.1.2 255.255.255.252
+   no shut
+ int Ethernet0/0
+   ip vrf forwarding clientBPOa
+   ip address 10.1.1.2 255.255.255.252
+   no shut
+end
+
+***
+
+R1:PEz: 
+config t
+ int Ethernet1/2
+  ip vrf forwarding clientBPIb
+  ip address 10.1.1.6 255.255.255.252
+  no shut
+ int Ethernet1/1
+  ip vrf forwarding clientPNBb
+  ip address 10.1.1.6 255.255.255.252
+  no shut
+ int Ethernet0/1
+  ip vrf forwarding clientBSPb
+  ip address 10.1.1.6 255.255.255.252
+  no shut
+ int Ethernet0/0
+  ip vrf forwarding clientBPOb
+  ip address 10.1.1.6 255.255.255.252
+  no shut
+end
+
+R1-PEz#bp
+Interface                  IP-Address      OK? Method Status                Protocol
+Ethernet0/0                10.1.1.6        YES manual up                    up      
+Ethernet0/1                10.1.1.6        YES manual up                    up      
+Ethernet1/0                10.1.1.1        YES NVRAM  up                    up      
+Ethernet1/1                10.1.1.6        YES manual up                    up      
+Ethernet1/2                10.1.1.6        YES manual up                    up      
+Loopback0                  172.16.1.1      YES manual up                    up
+
+!Make sure Real routers, can ping Virtual Routers!
+@PNBa/BPIa: ping 10.1.1.2
+@PNBb/BPIb: ping 10.1.1.6
+
+
+
+
+
+
+STEP 4: MP-BGP configuration MultiProtocol BGP
+
+BGP (handles 32bits:normal packet) 
+vs mBGP(multi Protocol BGP = 96bits= 32 + 64bits RD)
+
+R4:PEa
+config t
+ no router bgp 64999
+ router bgp 64999
+  !kill normal BGP, enable mBGP
+  no bgp default ipv4-unicast
+  neighbor 172.16.1.1 remote-as 64999
+  neighbor 172.16.1.1 update-source lo0
+  address-family vpnv4
+  !standard BGP config, but wont run (-:
+  neighbor 172.16.1.1 activate
+  neighbor 172.16.1.1 send-community both
+  exit-address-family
+  !activate the neigbor and exchange vpnv4 routes(32+64)
+end
+
+
+
+R1:PEz peering with Lo of R2!
+config t
+ no router bgp 64999
+ router bgp 64999
+  no bgp default ipv4-unicast
+  !disables IPv4 routing to handle VPN routes
+  neighbor 172.16.1.4 remote-as 64999
+  neighbor 172.16.1.4 update-source lo0
+  !standard BGP config, but wont run (-:
+  address-family vpnv4
+  neighbor 172.16.1.4 activate
+  neighbor 172.16.1.4 send-community both
+  exit-address-family
+  !activate the neigbor and exchange vpnv4 routes(32+64)
+end
+
+!This should be good.
+%BGP-5-ADJCHANGE: neighbor 172.16.1.4 Up  (parang tanim-bala sa dulo, hindi nasita sa gitna due to MPLS-LABEL)
+
+PE-A#show bgp all summary
+For address family: VPNv4 Unicast
+BGP router identifier 172.16.1.1, local AS number 64999
+BGP table version is 1, main routing table version 1
+
+Neighbor        V           AS MsgRcvd MsgSent   TblVer  InQ OutQ Up/Down  State/PfxRcd
+172.16.1.1      4        64999       4       4        1    0    0 00:02:09        0
+
+
+
+PE-Z#show bgp all summary
+For address family: VPNv4 Unicast
+BGP router identifier 172.16.1.1, local AS number 64999
+BGP table version is 1, main routing table version 1
+
+Neighbor        V           AS MsgRcvd MsgSent   TblVer  InQ OutQ Up/Down  State/PfxRcd
+172.16.1.4      4        64999       4       4        1    0    0 00:02:09        0
+
+
+
+STEP5: INDIVIDUAL VIRTUAL/LOGICAL ROUTER VRF CONFIGURATION.
+
+
+LOGICAL ROUTER OF PNB = clientPNBa/b
+R4:PEa
+config t
+ router eigrp 90
+  address-family ipv4 vrf clientPNBa
+  autonomous-system 90
+  network 10.0.0.0
+  no auto-summary
+  exit
+
+***
+
+R1:PeZ:
+config t
+  router eigrp 90
+   address-family ipv4 vrf clientPNBb
+   autonomous-system 90
+   network 10.0.0.0
+   no auto-summary
+   exit
+
+
+
+LOGICAL ROUTER OF BPI = clientBPIa/b
+R4:PEa
+config t
+ router ospf 69 vrf clientBPIa
+ network 0.0.0.0 0.0.0.0 area 0
+end
+
+***
+
+R1-:PeZ
+config t
+ router ospf 69 vrf clientBPIb
+  network 0.0.0.0 0.0.0.0 area 0
+end
+
+
+STEP6: ROUTE REDISTRIBUTIONS:
+
+RIP - mBGP-RIP/EIGRP-mBGP -EIGRP/OSPF - mBGP -OSPF/
+
+
+7.2:EIGRP-mBGP -EIGRP
+
+R4:PEa
+config t
+ router bgp 64999
+  address-family ipv4 vrf clientPNBa
+  redistribute eigrp 90 metric 1
+  exit
+ router eigrp 90
+  address-family ipv4 vrf clientPNBa
+   autonomous-system 90
+   network 10.0.0.0
+   no auto-summary
+   redistribute bgp 64999 metric 100000 10 1 255 1512
+   !seed metric,sh int fa1/2      bw  de/10 load rely mtu
+   exit-address-family
+end
+
+
+***
+R1:PEz
+config t
+ router bgp 64999
+  address-family ipv4 vrf clientPNBb
+  redistribute eigrp 90 metric 1
+  exit
+ router eigrp 90
+  address-family ipv4 vrf clientPNBb
+   autonomous-system 90
+   network 10.0.0.0
+   no auto-summary
+   redistribute bgp 64999 metric 100000 10 1 255 1512
+   exit-address-family
+end
+
+
+
+OSPF - mBGP -OSPF
+R4:PEa
+config t
+ router bgp 64999
+  address-family ipv4 vrf clientBPIa
+  no redistribute ospf 1
+  redistribute ospf 69
+  no auto-summary
+  exit
+ router ospf 69 vrf clientBPIa
+  redistribute bgp 64999 metric-type 1 subnets
+  network 0.0.0.0 0.0.0.0 area 0
+end
+
+***
+
+R1:PEz
+config t
+ router bgp 64999
+  address-family ipv4 vrf clientBPIb
+  no redistribute ospf 1
+  redistribute ospf 69
+  no auto-summary
+  exit
+ router ospf 69 vrf clientBPIb
+  redistribute bgp 64999 metric-type 1 subnets
+  network 0.0.0.0 0.0.0.0 area 0
+end
+
+
+**** PASTE THE EIGRP CONFIGS AGAIN: maybe ************
+
+STEP7.: 
+IGP CONFIGURATION ON CLINETS: PE engineers talk with CE eng.
+CE engineers will do this!
+
+****
+On all PNB(eigrp) routers:
+config t
+ router eigrp 90
+  network 10.0.0.0
+  no auto-summary
+end
+
+!There should be adjacency
+ %DUAL-5-NBRCHANGE: EIGRP-IPv4 90: Neighbor 10.1.1.2 (Ethernet1/1) is up: new adjacency
+**************************************
+
+On all BPI(ospf) routers:
+config t
+ no router ospf 1
+ router ospf 69
+  network 0.0.0.0 0.0.0.0 area 0
+end
+
+!There should be adjacency
+%OSPF-5-ADJCHG: Process 69, Nbr 10.1.1.6 on Ethernet1/3 from LOADING to FULL
+
+!FOR TESTING:
+@I2-BPIBGC       !(other BPI must not ping prior to configuring)
+conf t
+int lo 69
+ip add 69.0.0.1 255.255.255.255
+end
+!the other BPI must ping 69.0.0.1
+
+
+@D1-PNBAlabang    (other PNB must not ping prior to configuring)
+conf t
+int lo 69
+ip add 69.0.0.1 255.255.255.255
+exit
+router eigrp 90
+network 69.0.0.0
+end
+!the other PNB must ping 69.0.0.1
+
+!NO CONFLICT Because of the VRF.
+
+
+
+
+********************************
+
+EXTRA:  SOME NETWORKS/CLIENTS ARE USING RIP VERSION 2:
+PE-A
+config t
+ router rip
+  version 2
+  address-family ipv4 vrf clientBSPa
+   version 2
+   network 10.0.0.0
+   no auto-summary
+  address-family ipv4 vrf clientBSPa
+   version 2
+   network 10.0.0.0
+   no auto-summary
+
+***
+
+PE-Z
+config t
+ router rip
+  version 2
+  address-family ipv4 vrf clientBSPb
+   version 2
+   network 10.0.0.0
+   no auto-summary
+  address-family ipv4 vrf clientBSPb
+   version 2
+   network 10.0.0.0
+   no auto-summary
+
+route Redistribution between RIP and BGP(vice versa)
+route Redistribution between RIP and BGP(vice versa)
+
+PE-A
+config t
+ router bgp 64999
+  address-family ipv4 vrf clientBSPa
+   redistribute rip metric 1
+  address-family ipv4 vrf clientBSPa
+   redistribute rip metric 1
+   exit
+ !
+ router rip
+  address-family ipv4 vrf clientBSPa
+   redistribute bgp 64999 metric 1
+  address-family ipv4 vrf clientBSPa
+   redistribute bgp 64999 metric 1
+  exit
+
+***
+
+PE-Z
+config t
+ router bgp 64999
+  address-family ipv4 vrf clientBSPb
+   redistribute rip metric 1
+  address-family ipv4 vrf clientBSPb
+   redistribute rip metric 1
+   exit
+ !
+ router rip
+  address-family ipv4 vrf clientBSPb
+   redistribute bgp 64999 metric 1
+  address-family ipv4 vrf clientBSPb
+   redistribute bgp 64999 metric 1
+  exit
+
+on all BSP Clients:
+config t
+ router rip
+  version 2
+  no auto-summary
+  network 10.0.0.0
+end
+
+!FOR TESTING:   (can you figure out???)
+@BSP-A/B       !(other BSP must not ping prior to configuring)
+conf t
+int lo 69
+ip add 69.0.0.1 255.255.255.255
+router rip
+  version 2
+  no auto-summary
+  network 69.0.0.0
+end
+!the other BSP must ping 69.0.0.1
