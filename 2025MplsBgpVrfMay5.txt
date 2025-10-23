@@ -295,6 +295,9 @@ ip vrf clientBPOa
 ip vrf clientBSPa
    rd 888:5
    route-target 69666:5
+ip vrf clientUBa
+   rd 888:6
+   route-target 69666:6
    exit
 ***
 R1:pez
@@ -314,6 +317,9 @@ ip vrf clientBPOb
 ip vrf clientBSPb
   rd 888:5
   route-target 69666:5
+ip vrf clientUBb
+  rd 888:6
+  route-target 69666:6
   exit
 **********
 R4-PEa#show ip vrf
@@ -706,6 +712,7 @@ interface nve 1
    ingress-replication protocol static
      peer-ip 10.10.10.10
 	 exit
+
 
 
 
