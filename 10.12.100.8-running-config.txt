@@ -1,0 +1,407 @@
+
+!
+! Last configuration change at 13:09:39 UTC Mon Jan 2 2006 by admin
+version 15.2
+service timestamps debug datetime msec
+service timestamps log datetime msec
+service password-encryption
+!
+hostname cucm-12
+!
+boot-start-marker
+boot-end-marker
+!
+!
+no logging console
+enable secret 5 $1$Ac8d$zctjQ3Cs89MJNGdLqxnMo1
+!
+no aaa new-model
+!
+mmi polling-interval 60
+no mmi auto-configure
+no mmi pvc
+mmi snmp-timeout 180
+crypto pki token default removal timeout 0
+!
+!
+dot11 syslog
+!
+!
+!
+!
+!
+no ip domain lookup
+ip domain name autoday1.com
+ip cef
+no ipv6 cef
+!
+multilink bundle-name authenticated
+!
+!
+!
+!
+!
+!
+!
+voice service voip
+ ip address trusted list
+  ipv4 0.0.0.0 0.0.0.0
+ h323
+  call start slow
+!
+!
+!
+!
+!
+voice-card 0
+!
+!
+application
+ service rivanqueue flash:app-b-acd-3.0.0.2.tcl
+  param aa-hunt3 1277
+  param queue-len 15
+  param aa-hunt4 1233
+  param aa-hunt1 1200
+  param number-of-hunt-grps 4
+  param queue-manager-debugs 1
+  param aa-hunt2 1201
+ !
+ service rivanaa flash:app-b-acd-aa-3.0.0.2.tcl
+  paramspace english index 1
+  param number-of-hunt-grps 2
+  param dial-by-extension-option 8
+  param handoff-string rivanaa
+  param welcome-prompt flash:en_bacd_welcome.au
+  paramspace english language en
+  param call-retry-timer 15
+  param service-name rivanqueue
+  paramspace english location flash:
+  param second-greeting-time 60
+  param max-time-vm-retry 2
+  param max-time-call-retry 700
+  param voice-mail 1234
+  param aa-pilot {self.m}69
+ !
+!
+!
+!
+license udi pid C1861-UC-4FXO-K9 sn FTX1223Z15M
+username admin privilege 15 secret 5 $1$I7zh$njkKc1xxBiNGBPXjDu8vU1
+!
+!
+ip ssh rsa keypair-name devs
+ip ssh version 2
+! 
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface FastEthernet0/0
+ ip address 10.12.100.8 255.255.255.0
+ duplex auto
+ speed auto
+!
+interface Integrated-Service-Engine0/0
+ no ip address
+ shutdown
+!
+interface FastEthernet0/1/0
+ no ip address
+!
+interface FastEthernet0/1/1
+ no ip address
+!
+interface FastEthernet0/1/2
+ no ip address
+!
+interface FastEthernet0/1/3
+ no ip address
+!
+interface FastEthernet0/1/4
+ no ip address
+!
+interface FastEthernet0/1/5
+ no ip address
+!
+interface FastEthernet0/1/6
+ no ip address
+!
+interface FastEthernet0/1/7
+ no ip address
+!
+interface FastEthernet0/1/8
+ no ip address
+!
+interface FastEthernet0/2/0
+ no ip address
+ shutdown
+ duplex auto
+ speed auto
+!
+interface FastEthernet0/2/1
+ no ip address
+ shutdown
+ duplex auto
+ speed auto
+!
+interface Vlan1
+ no ip address
+!
+router ospf 1
+ router-id 10.12.100.8
+ network 10.12.100.0 0.0.0.255 area 0
+!
+ip forward-protocol nd
+no ip http server
+no ip http secure-server
+!
+!
+ip route 0.0.0.0 0.0.0.0 10.12.100.4 254
+!
+!
+!
+!
+!
+!
+!
+control-plane
+!
+!
+voice-port 0/0/0
+!
+voice-port 0/0/1
+!
+voice-port 0/0/2
+!
+voice-port 0/0/3
+!
+voice-port 0/1/0
+!
+voice-port 0/1/1
+!
+voice-port 0/1/2
+!
+voice-port 0/1/3
+!
+voice-port 0/4/0
+ auto-cut-through
+ signal immediate
+ input gain auto-control
+ description Music On Hold Port
+!
+!
+!
+mgcp profile default
+!
+!
+dial-peer voice 1 pots
+ destination-pattern 1200
+ port 0/0/0
+!
+dial-peer voice 2 pots
+ destination-pattern 1201
+ port 0/0/1
+!
+dial-peer voice 3 pots
+ destination-pattern 1202
+ port 0/0/2
+!
+dial-peer voice 4 pots
+ destination-pattern 1203
+ port 0/0/3
+!
+dial-peer voice 11 voip
+ destination-pattern 11..
+ session target ipv4:10.11.100.8
+ codec g711ulaw
+!
+dial-peer voice 12 voip
+ destination-pattern 12..
+ session target ipv4:10.12.100.8
+ codec g711ulaw
+!
+dial-peer voice 21 voip
+ destination-pattern 21..
+ session target ipv4:10.21.100.8
+ codec g711ulaw
+!
+dial-peer voice 22 voip
+ destination-pattern 22..
+ session target ipv4:10.22.100.8
+ codec g711ulaw
+!
+dial-peer voice 31 voip
+ destination-pattern 31..
+ session target ipv4:10.31.100.8
+ codec g711ulaw
+!
+dial-peer voice 32 voip
+ destination-pattern 32..
+ session target ipv4:10.32.100.8
+ codec g711ulaw
+!
+dial-peer voice 41 voip
+ destination-pattern 41..
+ session target ipv4:10.41.100.8
+ codec g711ulaw
+!
+dial-peer voice 42 voip
+ destination-pattern 42..
+ session target ipv4:10.42.100.8
+ codec g711ulaw
+!
+dial-peer voice 51 voip
+ destination-pattern 51..
+ session target ipv4:10.51.100.8
+ codec g711ulaw
+!
+dial-peer voice 52 voip
+ destination-pattern 52..
+ session target ipv4:10.52.100.8
+ codec g711ulaw
+!
+dial-peer voice 61 voip
+ destination-pattern 61..
+ session target ipv4:10.61.100.8
+ codec g711ulaw
+!
+dial-peer voice 62 voip
+ destination-pattern 62..
+ session target ipv4:10.62.100.8
+ codec g711ulaw
+!
+dial-peer voice 71 voip
+ destination-pattern 71..
+ session target ipv4:10.71.100.8
+ codec g711ulaw
+!
+dial-peer voice 72 voip
+ destination-pattern 72..
+ session target ipv4:10.72.100.8
+ codec g711ulaw
+!
+dial-peer voice 81 voip
+ destination-pattern 81..
+ session target ipv4:10.81.100.8
+ codec g711ulaw
+!
+dial-peer voice 82 voip
+ destination-pattern 82..
+ session target ipv4:10.82.100.8
+ codec g711ulaw
+!
+dial-peer voice 91 voip
+ destination-pattern 91..
+ session target ipv4:10.91.100.8
+ codec g711ulaw
+!
+dial-peer voice 92 voip
+ destination-pattern 92..
+ session target ipv4:10.92.100.8
+ codec g711ulaw
+!
+dial-peer voice 69 voip
+ service rivanaa out-bound
+ destination-pattern 1269
+ session target ipv4:10.12.100.8
+ incoming called-number 1269
+ dtmf-relay h245-alphanumeric
+ codec g711ulaw
+ no vad
+!
+!
+!
+!
+telephony-service
+ no auto-reg-ephone
+ max-ephones 5
+ max-dn 20
+ ip source-address 10.12.100.8 port 2000
+ max-conferences 4 gain -6
+ moh "flash:/en_bacd_music_on_hold.au"
+ transfer-system full-consult
+ create cnf-files version-stamp 7960 Jan 02 2006 13:09:30
+!
+!
+ephone-dn  1
+ number 1211
+!
+!
+ephone-dn  2
+ number 1222
+!
+!
+ephone-dn  3
+ number 1233
+!
+!
+ephone-dn  4
+ number 1244
+!
+!
+ephone-dn  5
+ number 1255
+!
+!
+ephone-dn  6
+ number 1266
+!
+!
+ephone-dn  7
+ number 1277
+!
+!
+ephone-dn  8
+ number 1288
+!
+!
+ephone  1
+ device-security-mode none
+ video
+ mac-address 64E9.50CA.747E
+ max-calls-per-button 3
+ busy-trigger-per-button 2
+ type 8945
+ button  1:1 2:2 3:3 4:4
+!
+!
+!
+ephone  2
+ device-security-mode none
+ video
+ mac-address CCD8.C1FB.161B
+ max-calls-per-button 3
+ busy-trigger-per-button 2
+ type 8945
+ button  1:5 2:6 3:7 4:8
+!
+!
+!
+line con 0
+ exec-timeout 0 0
+ password 7 105E080A16
+ login
+line aux 0
+line 2
+ no activation-character
+ no exec
+ transport preferred none
+ transport input all
+ transport output pad telnet rlogin lapb-ta mop udptn v120 ssh
+line vty 0 4
+ exec-timeout 0 0
+ password 7 095C4F1A0A
+ login local
+ transport input all
+line vty 5 14
+ exec-timeout 0 0
+ password 7 095C4F1A0A
+ login local
+ transport input all
+!
+end

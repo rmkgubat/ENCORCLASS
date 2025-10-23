@@ -1,0 +1,127 @@
+
+!
+! Last configuration change at 01:56:49 UTC Mon Mar 1 1993 by admin
+!
+version 15.0
+no service pad
+service timestamps debug datetime msec
+service timestamps log datetime msec
+service password-encryption
+!
+hostname coreTaas-12
+!
+boot-start-marker
+boot-end-marker
+!
+!
+no logging console
+enable secret 5 $1$1kyj$YxC0tYJ/SYcRIcXE1R2iW0
+!
+username admin privilege 15 secret 5 $1$5spC$p83L4zt/b.IlbnMaOBytw0
+no aaa new-model
+system mtu routing 1500
+no ip domain-lookup
+ip domain-name autoday1.com
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+spanning-tree mode pvst
+spanning-tree extend system-id
+!
+vlan internal allocation policy ascending
+!
+ip ssh rsa keypair-name devs
+ip ssh version 2
+!
+! 
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface Loopback10
+ ip address 10.10.10.10 255.255.255.255
+!
+interface FastEthernet0/1
+!
+interface FastEthernet0/2
+!
+interface FastEthernet0/3
+!
+interface FastEthernet0/4
+!
+interface FastEthernet0/5
+!
+interface FastEthernet0/6
+!
+interface FastEthernet0/7
+!
+interface FastEthernet0/8
+!
+interface FastEthernet0/9
+!
+interface FastEthernet0/10
+!
+interface FastEthernet0/11
+!
+interface FastEthernet0/12
+!
+interface GigabitEthernet0/1
+!
+interface Vlan1
+ description VLAN-MGMT-DATA
+ ip address 10.12.1.2 255.255.255.0
+!
+interface Vlan10
+ description VLAN-MGMT-WIFI
+ ip address 10.12.10.2 255.255.255.0
+!
+interface Vlan50
+ description VLAN-MGMT-CCTV
+ ip address 10.12.50.2 255.255.255.0
+!
+interface Vlan100
+ description VLAN-MGMT-VOICE
+ ip address 10.12.100.2 255.255.255.0
+!
+ip http server
+ip http secure-server
+!
+!
+!
+!
+!
+!
+line con 0
+ exec-timeout 0 0
+ password 7 1315160118
+ login
+line vty 0 4
+ exec-timeout 0 0
+ password 7 105E080A16
+ login local
+ transport input all
+line vty 5 14
+ exec-timeout 0 0
+ password 7 105E080A16
+ login local
+ transport input all
+line vty 15
+ login
+!
+end
