@@ -90,10 +90,10 @@ D2:
 config t
 router eigrp 100
  no auto-summary
-ikaw sagot:_____________________
-ikaw sagot:_____________________
-ikaw sagot:_____________________
-ikaw sagot:_____________________
+network 10.1.4.8 0.0.0.3
+network 10.2.1.0 0.0.0.255
+network 10.2.2.0 0.0.0.255
+network 192.168.1.128. 0.0.0.31
 end
 show ip eigrp neighbor
 
@@ -122,23 +122,38 @@ R4:
 config t
 router ospf 1
 network 10.1.1.8 0.0.0.3 area 34
+int eth 1/2
+ip ospf priority 0
 
 R3:
 config t
 router ospf 1
-ikaw sagot:_____________________
-ikaw sagot:_____________________
+network 10.1.1.8 0.0.0.3 area 34
+network 10.1.1.4 0.0.0.3 area 0
+int eth	1/2
+ip ospf priority 255
+int eth 1/1
+ip ospf priority 255
 
 R2:
 config t
 router ospf 1
 network 10.1.1.4 0.0.0.3 area 0
 network 10.1.1.0 0.0.0.3 area 12
+int eth 1/1
+ip ospf priority 254
+int eth 1/2
+ip ospf network point-to-point
+
 
 R1:
 config t
 router ospf 1
-ikaw sagot:_____________________
+network 10.1.1.0 0.0.0.3 area 12
+int eth 1/1
+ip ospf network point-to-point
+end
+
 
 @@@
 TASK9.3: BASIC eBGP FOR ISPS and R1.
@@ -248,7 +263,7 @@ router ospf 1
   exit
 !ipasok ang ospf sa mundo ng eigrp
 router eigrp 100
-  redistribute ospf 1 metric 1544 2000 255 1 1500
+  redistribute ospf 1 metric 10000 1000 255 1 1500
 
 R1:
 !redistrubte internet routes to ospf from BGP.
@@ -2196,6 +2211,7 @@ R1#sr os | inc 4.4
 O E2     4.4.0.0 [110/20] via 10.1.1.2, 00:02:29, Ethernet1/0
 O IA     4.4.4.0 [110/31] via 10.1.1.2, 00:00:07, Ethernet1/0
 R1#
+
 
 
 
